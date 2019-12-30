@@ -28,9 +28,18 @@ gem 'jbuilder', '~> 2.7'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.2', require: false
 
+# Used for api requests
 gem 'faraday', '~> 0.15'
 
 gem 'adyen-ruby-api-library'
+
+# Used for storing secrets/env variables
+gem 'figaro'
+
+# Replace default html templating engine
+gem 'slim'
+
+#gem 'rack' ->
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

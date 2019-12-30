@@ -1,0 +1,72 @@
+h1 Checkout
+
+
+div#dropin
+
+
+link rel="stylesheet" href="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.css"
+script src="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.js"
+
+javascript:
+  const configuration = {
+    locale: "en-US", // The shopper's locale. For a list of supported locales, see https://docs.adyen.com/checkout/components-web/localization-components.
+    environment: "test", // When you're ready to accept live payments, change the value to one of our live environments https://docs.adyen.com/checkout/drop-in-web#testing-your-integration.
+    originKey: "#{ENV['ORIGIN_KEY']}", // Your website's Origin Key. To find out how to generate one, see https://docs.adyen.com/user-management/how-to-get-an-origin-key.
+    paymentMethodsResponse: #{ raw @payment_methods_response } // The payment methods response returned in step 1.
+  };
+
+  // console.log("#{ @payment_methods_response}");
+  // console.log("#{  raw @payment_methods_response}");
+  const checkout = new AdyenCheckout(configuration);
+  // debugger
+
+  function makePayment(data) {
+    fetch('/checkouts', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then((response) => {
+      return response.json();
+    })
+  }
+
+  const dropin = checkout
+    .create('dropin', {
+      paymentMethodsConfiguration: {
+        card: { // Example optional configuration for Cards
+          hasHolderName: true,
+          holderNameRequired: true,
+          enableStoreDetails: true,
+          hideCVC: false, // Change this to true to hide the CVC field for stored cards
+          name: 'Credit or debit card',
+          amount: {
+            value: 10000,
+            currency: "EUR"
+          }
+        }
+      },
+      onSubmit: (state, dropin) => {
+        makePayment(state.data)
+          // Your function calling your server to make the /payments request
+          .then(action => {
+            console.log(action)
+            dropin.handleAction(action);
+            // Drop-in handles the action object from the /payments response
+          })
+          .catch(error => {
+            throw Error(error);
+          });
+      },
+      onAdditionalDetails: (state, dropin) => {
+        makeDetailsCall(state.data)
+          // Your function calling your server to make a /payments/details request
+          .then(action => {
+            dropin.handleAction(action);
+            // Drop-in handles the action object from the /payments/details response
+          })
+          .catch(error => {
+            throw Error(error);
+          });
+      }
+    })
+    .mount('#dropin');
