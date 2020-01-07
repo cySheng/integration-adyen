@@ -24,7 +24,7 @@ class Integration::Adyen::Checkout
     response.response.to_json
   end
 
-  def generate_3ds2_payment_request(payment_method, browser_info, ip_address)
+  def generate_3ds2_payment_request(payment_method:, browser_info:, ip_address:, root_url:, return_url:)
     request = @adyen.checkout.payments({
       :amount => {
         :currency => "EUR",
@@ -57,7 +57,7 @@ class Integration::Adyen::Checkout
       #  "cvc": "737"
       #},
       :origin => root_url,
-      :returnUrl => success_checkouts_url,
+      :returnUrl => return_url,
       :merchantAccount => ENV["MERCHANT_ACCOUNT"],
       :browserInfo => browser_info
     })

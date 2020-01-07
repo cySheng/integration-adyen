@@ -7,9 +7,11 @@ class CheckoutsController < ApplicationController
 
   def create
     @payment = @adyen_api.generate_3ds2_payment_request(
-      payment_method_params,
-      browser_info_params,
-      request.remote_ip
+      payment_method: payment_method_params,
+      browser_info: browser_info_params,
+      ip_address: request.remote_ip,
+      root_url: root_url,
+      return_url: success_checkouts_url
     )
 
     render json: @payment.action

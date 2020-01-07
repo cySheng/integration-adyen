@@ -65,15 +65,29 @@ javascript:
         }
       },
       onSubmit: (state, dropin) => {
-        makePayment(state.data)
-          // Your function calling your server to make the /payments request
-          .then(action => {
-            dropin.handleAction(action);
-            // Drop-in handles the action object from the /payments response
-          })
-          .catch(error => {
-            throw Error(error);
-          });
+        // const result = makePayment(state.data)
+        let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
+        fetch('/checkouts', {
+          method: 'POST',
+          body: JSON.stringify(state.data),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          }
+        })
+        .then((response) => {
+          console.log('/checkouts Response Return')
+          debugger
+          return response.json();
+        })
+        .then(action => {
+          console.log(action)
+          dropin.handleAction(action);
+          // Drop-in handles the action object from the /payments response
+        })
+        .catch(error => {
+          throw Error(error);
+        });
       },
       onAdditionalDetails: (state, dropin) => {
         makeDetailsCall(state.data)
