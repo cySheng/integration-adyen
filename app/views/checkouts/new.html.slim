@@ -27,7 +27,7 @@ javascript:
       }
     })
     .then((response) => {
-      console.log('Payment Response Return')
+      console.log('/checkouts Response Return')
       debugger
       return response.json();
     })
@@ -44,7 +44,7 @@ javascript:
         // 'Content-Type': 'application/x-www-form-urlencoded',
       }
     }).then((response) => {
-      console.log('Payment Details Response Return')
+      console.log('/checkout/details Response Return')
       return response.json();
     })
   }
@@ -76,7 +76,6 @@ javascript:
           });
       },
       onAdditionalDetails: (state, dropin) => {
-        console.log('hi')
         makeDetailsCall(state.data)
           // Your function calling your server to make a /payments/details request
           .then(action => {

@@ -56,8 +56,8 @@ class Integration::Adyen::Checkout
       #  "expiryYear": "2030",
       #  "cvc": "737"
       #},
-      :origin => "http://localhost:3000",
-      :returnUrl => "http://localhost:3000/checkouts/success",
+      :origin => root_url,
+      :returnUrl => success_checkouts_url,
       :merchantAccount => ENV["MERCHANT_ACCOUNT"],
       :browserInfo => browser_info
     })

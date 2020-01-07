@@ -11,13 +11,8 @@ class CheckoutsController < ApplicationController
       browser_info_params,
       request.remote_ip
     )
-    binding.pry
-    render json: @payment.action
 
-    #@payment.response
-    #p @payment
-    #payment_response_hash = JSON.parse(@payment.body)
-    #result_code = payment_response_hash["resultCode"]
+    render json: @payment.action
   end
 
   def payment_details
