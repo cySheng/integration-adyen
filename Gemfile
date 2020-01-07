@@ -31,6 +31,7 @@ gem 'bootsnap', '>= 1.4.2', require: false
 # Used for api requests
 gem 'faraday', '~> 0.15'
 
+# Used for communicating with Adyen's API
 gem 'adyen-ruby-api-library'
 
 # Used for storing secrets/env variables
@@ -39,11 +40,13 @@ gem 'figaro'
 # Replace default html templating engine
 gem 'slim'
 
-#gem 'rack' ->
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+
+  # binding pry
+  gem 'pry'
 end
 
 group :development do

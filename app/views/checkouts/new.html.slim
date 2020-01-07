@@ -3,29 +3,48 @@ h1 Checkout
 
 div#dropin
 
-
 link rel="stylesheet" href="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.css"
 script src="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.js"
 
 javascript:
   const configuration = {
-    locale: "en-US", // The shopper's locale. For a list of supported locales, see https://docs.adyen.com/checkout/components-web/localization-components.
-    environment: "test", // When you're ready to accept live payments, change the value to one of our live environments https://docs.adyen.com/checkout/drop-in-web#testing-your-integration.
-    originKey: "#{ENV['ORIGIN_KEY']}", // Your website's Origin Key. To find out how to generate one, see https://docs.adyen.com/user-management/how-to-get-an-origin-key.
-    paymentMethodsResponse: #{ raw @payment_methods_response } // The payment methods response returned in step 1.
+    locale: "en-US",
+    environment: "test",
+    originKey: "#{ENV['ORIGIN_KEY']}",
+    paymentMethodsResponse: #{ raw @payment_methods_response }
   };
 
-  // console.log("#{ @payment_methods_response}");
-  // console.log("#{  raw @payment_methods_response}");
   const checkout = new AdyenCheckout(configuration);
-  // debugger
 
   function makePayment(data) {
+    let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
     fetch('/checkouts', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      }
     })
     .then((response) => {
+      console.log('Payment Response Return')
+      debugger
+      return response.json();
+    })
+  }
+
+  function makeDetailsCall(data) {
+    let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
+    fetch('/checkouts/details', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      }
+    }).then((response) => {
+      console.log('Payment Details Response Return')
       return response.json();
     })
   }
@@ -49,7 +68,6 @@ javascript:
         makePayment(state.data)
           // Your function calling your server to make the /payments request
           .then(action => {
-            console.log(action)
             dropin.handleAction(action);
             // Drop-in handles the action object from the /payments response
           })
@@ -58,9 +76,11 @@ javascript:
           });
       },
       onAdditionalDetails: (state, dropin) => {
+        console.log('hi')
         makeDetailsCall(state.data)
           // Your function calling your server to make a /payments/details request
           .then(action => {
+            debugger
             dropin.handleAction(action);
             // Drop-in handles the action object from the /payments/details response
           })

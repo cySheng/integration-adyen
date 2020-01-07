@@ -1,51 +1,67 @@
-class Integration::Adyen::Checkout < ApplicationRecord
-  class << self
-    def prepare_request
-      @adyen = Adyen::Client.new
-      @adyen.api_key = ENV["API_KEY"]
-      @adyen.env = :test
-    end
+class Integration::Adyen::Checkout
+  # params that are regularly used 
+  # STANDARD_PARAMS = {}
 
-    def generate_payment_methods
-      prepare_request
+  # setup configuration to adyen's api
+  def initialize 
+    @adyen = ::Adyen::Client.new
+    @adyen.checkout.version = 51
+    @adyen.api_key = ENV["API_KEY"]
+    @adyen.env = :test
+  end
 
-      response = @adyen.checkout.payment_methods({
-        :merchantAccount => ENV["MERCHANT_ACCOUNT"],
-        :countryCode => 'NL',
-        :amount => {
-          :currency => 'EUR',
-          :value => 1000
-        },
-        :channel => 'Web'
-      })
+  def generate_payment_methods
+    response = @adyen.checkout.payment_methods({
+      :merchantAccount => ENV["MERCHANT_ACCOUNT"],
+      :countryCode => 'NL',
+      :amount => {
+        :currency => 'EUR',
+        :value => 1000
+      },
+      :channel => 'Web'
+    })
 
-      # TBR
-      response.response.to_json
-    end
+    response.response.to_json
+  end
 
-    def generate_payment_request(payment_method)
-      prepare_request
+  def generate_3ds2_payment_request(payment_method, browser_info, ip_address)
+    request = @adyen.checkout.payments({
+      :amount => {
+        :currency => "EUR",
+        :value => 12100
+      },
+      :shopperIP => ip_address,
+      :channel => "Web",
+      :reference => "12345",
+      :additionalData => {
+        :allow3DS2 => "true"
+      },
+      "billingAddress": {
+        "country": "US",
+        "city": "New York",
+        "street": "Redwood Block",
+        "houseNumberOrName": "37C",
+        "stateOrProvince": "NY",
+        "postalCode": "10039"
+      },
+      "shopperEmail": {
+        "shopperEmail": 'testing112312@gmail.com'
+      },
+      :paymentMethod => payment_method["paymentMethod"].to_h,
+      #paymentMethod: {
+      #  "type": "scheme",
+      #  "holderName": "John Smith",
+      #  "number": "4545 4545 4545 4545",
+      #  "expiryMonth": "03",
+      #  "expiryYear": "2030",
+      #  "cvc": "737"
+      #},
+      :origin => "http://localhost:3000",
+      :returnUrl => "http://localhost:3000/checkouts/success",
+      :merchantAccount => ENV["MERCHANT_ACCOUNT"],
+      :browserInfo => browser_info
+    })
 
-      response = adyen.checkout.payments({
-        :amount => {
-          :currency => "EUR",
-          :value => 1000
-        },
-        :shopperIP => "192.168.1.3",
-        :channel => "Web",
-        :reference => "12345",
-        :additionalData => {
-          :executeThreeD => "true"
-        },
-        :paymentMethod => payment_method,
-        :returnUrl => "http://localhost:3000/checkout/confirmation",
-        :merchantAccount => ENV["MERCHANT_ACCOUNT"],
-        :browserInfo => {
-          :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
-          :acceptHeader => "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
-        }
-      })
-    response
-    end
+    request.response
   end
 end

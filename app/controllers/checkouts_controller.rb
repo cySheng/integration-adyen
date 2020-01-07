@@ -1,14 +1,43 @@
 class CheckoutsController < ApplicationController
+  before_action :set_adyen_api
+
   def new
-    @payment_methods_response = Integration::Adyen::Checkout.generate_payment_methods
+    @payment_methods_response = @adyen_api.generate_payment_methods
   end
 
   def create
-    @checkout = Integration::Adyen::Checkout.generate_payment_request(params["paymentMethod"])
+    @payment = @adyen_api.generate_3ds2_payment_request(
+      payment_method_params,
+      browser_info_params,
+      request.remote_ip
+    )
+    binding.pry
+    render json: @payment.action
+
+    #@payment.response
+    #p @payment
+    #payment_response_hash = JSON.parse(@payment.body)
+    #result_code = payment_response_hash["resultCode"]
+  end
+
+  def payment_details
+
+  end
+
+  def success
+
   end
 
   private
-  def pay_params
+  def set_adyen_api
+    @adyen_api = Integration::Adyen::Checkout.new
+  end
 
+  def payment_method_params
+    params.permit(paymentMethod: {})
+  end
+
+  def browser_info_params
+    params.permit(browserInfo: {})
   end
 end

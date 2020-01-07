@@ -1,24 +1,14 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+1. Run bundle install
+2. `bundle exec figaro install`  
+3. `rails db:create`
+4. `rails db:migrate` 
 
-Things you may want to cover:
+Integrate Adyen's API 
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Problems:
+- Sending payment through postman (placed params at wrong location)
+- Only able to get paymentmethods api call working on postman
+- Confusion regarding merchant name and account name
+- Not sure what went wrong when couldn't the request said it couldn't decrypt data

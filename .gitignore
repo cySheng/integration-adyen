@@ -30,8 +30,8 @@
 yarn-debug.log*
 .yarn-integrity
 
-# ruby mine files
-.idea
-
 # Ignore application configuration
 /config/application.yml
+
+# ignore ruby mind configs
+/.idea/
