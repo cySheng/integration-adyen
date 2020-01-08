@@ -1,0 +1,8 @@
+h1 Checkouts success page!
+
+h3 Your payment details:
+p Result Code: #{ params["resultCode"] }
+p Type: #{ params["type"] }
+p Payload: #{ params["payload"] }
+
+= link_to 'Make another payment', new_checkout_path
