@@ -10,7 +10,7 @@ class Integration::Adyen::Checkout
     @adyen.env = :test
   end
 
-  def generate_payment_methods
+  def request_payment_methods
     response = @adyen.checkout.payment_methods({
       :merchantAccount => ENV["MERCHANT_ACCOUNT"],
       :countryCode => 'NL',
@@ -24,7 +24,7 @@ class Integration::Adyen::Checkout
     response.response.to_json
   end
 
-  def generate_3ds2_payment_request(payment_method:, browser_info:, ip_address:, root_url:, return_url:)
+  def post_payment(payment_method:, browser_info:, ip_address:, root_url:, return_url:)
     request = @adyen.checkout.payments({
       :amount => {
         :currency => "EUR",
@@ -61,6 +61,12 @@ class Integration::Adyen::Checkout
       :merchantAccount => ENV["MERCHANT_ACCOUNT"],
       :browserInfo => browser_info
     })
+
+    request.response
+  end
+
+  def post_payment_details(payment_details)
+    request = @adyen.checkout.payments.details(payment_details)
 
     request.response
   end

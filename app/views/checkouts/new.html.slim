@@ -1,7 +1,24 @@
-h1 Checkout
+header
+  h1 Adyen Checkout
 
+main
+  section#product
+    table
+      tr
+        th Product
+        th Quantity
+        th Price
+      tbody
+        tr
+          td Glasses
+          td 1
+          td SGD 100.00
+        tr
+          td Poster
+          td 1
+          td SGD 20.00
 
-div#dropin
+  section#dropin
 
 link rel="stylesheet" href="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.css"
 script src="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.js"
@@ -16,36 +33,41 @@ javascript:
 
   const checkout = new AdyenCheckout(configuration);
 
-  function makePayment(data) {
-    let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
-    fetch('/checkouts', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      }
-    })
-    .then((response) => {
-      console.log('/checkouts Response Return')
-      debugger
-      return response.json();
+
+  const makePayment = (data) => {
+    return new Promise((resolve, reject) => {
+      let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
+
+      fetch('/checkouts', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        }
+      })
+      .then((response) => {
+        console.log('/checkouts Response Return')
+        resolve(response.json())
+      })
     })
   }
 
-  function makeDetailsCall(data) {
-    let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
-    fetch('/checkouts/details', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      }
-    }).then((response) => {
-      console.log('/checkout/details Response Return')
-      return response.json();
+  const makeDetailsCall = (data) => {
+    return new Promise((resolve, reject) => {
+      let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
+
+      fetch('/checkouts/details', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        }
+      }).then((response) => {
+        console.log('/checkout/details Response Return')
+        resolve(response)
+      })
     })
   }
 
@@ -65,39 +87,22 @@ javascript:
         }
       },
       onSubmit: (state, dropin) => {
-        // const result = makePayment(state.data)
-        let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
-        fetch('/checkouts', {
-          method: 'POST',
-          body: JSON.stringify(state.data),
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfToken
-          }
-        })
-        .then((response) => {
-          console.log('/checkouts Response Return')
-          debugger
-          return response.json();
-        })
-        .then(action => {
-          console.log(action)
-          dropin.handleAction(action);
-          // Drop-in handles the action object from the /payments response
-        })
-        .catch(error => {
-          throw Error(error);
-        });
+        makePayment(state.data)
+          .then(action => {
+            dropin.handleAction(action);
+          })
+          .catch(error => {
+            console.log('Make Payment Error')
+            throw Error(error);
+          });
       },
       onAdditionalDetails: (state, dropin) => {
         makeDetailsCall(state.data)
-          // Your function calling your server to make a /payments/details request
           .then(action => {
-            debugger
             dropin.handleAction(action);
-            // Drop-in handles the action object from the /payments/details response
           })
           .catch(error => {
+            console.log('Make Details Call Error')
             throw Error(error);
           });
       }
