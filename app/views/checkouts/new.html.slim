@@ -20,91 +20,94 @@ main
 
   section#dropin
 
-link rel="stylesheet" href="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.css"
-script src="https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.js"
+
 
 javascript:
-  const configuration = {
-    locale: "en-US",
-    environment: "test",
-    originKey: "#{ENV['ORIGIN_KEY']}",
-    paymentMethodsResponse: #{ raw @payment_methods_response }
-  };
+  document.addEventListener("turbolinks:load", function () {
+    const configuration = {
+      locale: "en-US",
+      environment: "test",
+      originKey: "#{ENV['ORIGIN_KEY']}",
+      paymentMethodsResponse: #{ raw @payment_methods_response.to_json }
+    };
 
-  const checkout = new AdyenCheckout(configuration);
+    const checkout = new AdyenCheckout(configuration);
 
 
-  const makePayment = (data) => {
-    return new Promise((resolve, reject) => {
-      let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
+    const makePayment = (data) => {
+      return new Promise((resolve, reject) => {
+        let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
 
-      fetch('/checkouts', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        }
-      })
-      .then((response) => {
-        console.log('/checkouts Response Return')
-        resolve(response.json())
-      })
-    })
-  }
-
-  const makeDetailsCall = (data) => {
-    return new Promise((resolve, reject) => {
-      let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
-
-      fetch('/checkouts/details', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
-        }
-      }).then((response) => {
-        console.log('/checkout/details Response Return')
-        resolve(response)
-      })
-    })
-  }
-
-  const dropin = checkout
-    .create('dropin', {
-      paymentMethodsConfiguration: {
-        card: { // Example optional configuration for Cards
-          hasHolderName: true,
-          holderNameRequired: true,
-          enableStoreDetails: true,
-          hideCVC: false, // Change this to true to hide the CVC field for stored cards
-          name: 'Credit or debit card',
-          amount: {
-            value: 10000,
-            currency: "EUR"
+        fetch('/checkouts', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+            'Accept': 'application/json'
           }
+        })
+          .then((response) => {
+            console.log('/checkouts Response Return')
+            resolve(response.json())
+          })
+      })
+    }
+
+    const makeDetailsCall = (data) => {
+      return new Promise((resolve, reject) => {
+        let csrfToken = document.head.querySelector("[name~=csrf-token][content]").content
+
+        fetch('/checkouts/details', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+            'Accept': 'application/json'
+          }
+        }).then((response) => {
+          console.log('/checkout/details Response Return')
+          resolve(response.json())
+        })
+      })
+    }
+
+    const dropin = checkout
+      .create('dropin', {
+        paymentMethodsConfiguration: {
+          card: { // Example optional configuration for Cards
+            hasHolderName: true,
+            holderNameRequired: true,
+            enableStoreDetails: true,
+            hideCVC: false, // Change this to true to hide the CVC field for stored cards
+            name: 'Credit or debit card',
+            amount: {
+              value: 10000,
+              currency: "EUR"
+            }
+          }
+        },
+        onSubmit: (state, dropin) => {
+          makePayment(state.data)
+            .then(action => {
+              dropin.handleAction(action);
+            })
+            .catch(error => {
+              // window.location.replace("#{ error_checkouts_path }?error=" + error)
+              throw Error(error);
+            });
+        },
+        onAdditionalDetails: (state, dropin) => {
+          makeDetailsCall(state.data)
+            .then(action => {
+              dropin.handleAction(action);
+            })
+            .catch(error => {
+              window.location.replace("#{ error_checkouts_path }?error=" + error)
+              // throw Error(error);
+            });
         }
-      },
-      onSubmit: (state, dropin) => {
-        makePayment(state.data)
-          .then(action => {
-            dropin.handleAction(action);
-          })
-          .catch(error => {
-            console.log('Make Payment Error')
-            throw Error(error);
-          });
-      },
-      onAdditionalDetails: (state, dropin) => {
-        makeDetailsCall(state.data)
-          .then(action => {
-            dropin.handleAction(action);
-          })
-          .catch(error => {
-            console.log('Make Details Call Error')
-            throw Error(error);
-          });
-      }
-    })
-    .mount('#dropin');
+      })
+      .mount('#dropin');
+  })

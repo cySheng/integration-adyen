@@ -4,5 +4,6 @@ Rails.application.routes.draw do
   root 'checkouts#new'
   resources :checkouts, only: [:new, :create] do
     get :success, on: :collection
+    get :error, on: :collection
   end
 end

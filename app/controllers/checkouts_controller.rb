@@ -33,7 +33,14 @@ class CheckoutsController < ApplicationController
   end
 
   def success
+    respond_to do |format|
+      format.html
+      format.json
+    end
+  end
 
+  def error
+    @error = params[:error]
   end
 
   private

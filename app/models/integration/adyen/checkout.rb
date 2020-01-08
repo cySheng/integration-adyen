@@ -11,7 +11,7 @@ class Integration::Adyen::Checkout
   end
 
   def request_payment_methods
-    response = @adyen.checkout.payment_methods({
+    request = @adyen.checkout.payment_methods({
       :merchantAccount => ENV["MERCHANT_ACCOUNT"],
       :countryCode => 'NL',
       :amount => {
@@ -21,7 +21,7 @@ class Integration::Adyen::Checkout
       :channel => 'Web'
     })
 
-    response.response.to_json
+    request.response
   end
 
   def post_payment(payment_method:, browser_info:, ip_address:, root_url:, return_url:)

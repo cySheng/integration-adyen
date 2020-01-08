@@ -1,0 +1,57 @@
+// Place all the styles related to the checkouts controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: https://sass-lang.com/
+body {
+  font-family: monospace;
+  margin: 0.5em 3.5em;
+}
+
+main {
+  @media (min-width: 950px) {
+    display: flex;
+  }
+
+  section#product {
+    flex-grow: 1;
+    margin-right: 2em;
+    margin-bottom: 3em;
+
+    table {
+      --border: 1px solid #ccced1;
+      text-align: center;
+      font-size: 16px;
+      border-spacing: 0;
+      width: 100%;
+      border: var(--border);
+      border-radius: 0.5rem;
+
+      th {
+        border-bottom: var(--border);
+        background: #c8e5ff;
+
+        &:first-child {
+          border-top-left-radius: 0.2rem;
+        }
+        &:last-child {
+          border-top-right-radius: 0.2rem;
+        }
+      }
+
+      td,
+      th {
+        border-right: var(--border);
+        padding: 1rem 0.5rem;
+
+        &:last-child {
+          border-right: none;
+        }
+      }
+
+      tr:not(:last-child) {
+        td {
+          border-bottom: var(--border);
+        }
+      }
+    }
+  }
+}
