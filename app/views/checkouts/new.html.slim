@@ -47,10 +47,10 @@ javascript:
             'Accept': 'application/json'
           }
         })
-          .then((response) => {
-            console.log('/checkouts Response Return')
-            resolve(response.json())
-          })
+        .then((response) => {
+          console.log('/checkouts Response Return')
+          resolve(response.json())
+        })
       })
     }
 
@@ -90,11 +90,28 @@ javascript:
         },
         onSubmit: (state, dropin) => {
           makePayment(state.data)
-            .then(action => {
-              dropin.handleAction(action);
+            .then(response => {
+              if (response.action === 'redirect') {
+                dropin.handleAction(response);
+              } else {
+                debugger
+                switch(response.resultCode) {
+                  case "Authorised":
+                  case "Pending":
+                  case "Received":
+                  case "PresentToShopper":
+                    dropin.setStatus('success', { message: `${ response.resultCode }` })
+                    console.log(response)
+                    break;
+                  case "Error":
+                  case "Refused":
+                    dropin.setStatus('error', { message: `${ response.resultCode }` })
+                    break;
+                }
+              }
             })
             .catch(error => {
-              // window.location.replace("#{ error_checkouts_path }?error=" + error)
+              dropin.setStatus('error', { message: `${ error }` })
               throw Error(error);
             });
         },
@@ -104,8 +121,8 @@ javascript:
               dropin.handleAction(action);
             })
             .catch(error => {
-              window.location.replace("#{ error_checkouts_path }?error=" + error)
-              // throw Error(error);
+              dropin.setStatus('error', { message: `${ response.resultCode }` })
+              throw Error(error);
             });
         }
       })

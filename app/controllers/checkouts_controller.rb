@@ -17,13 +17,16 @@ class CheckoutsController < ApplicationController
     if @payment.has_key?('action')
       render json: @payment.action
     elsif @payment.has_key?('errorCode')
-      render 'checkouts/error'
+      render json: @payment
     else
       case @payment.resultCode
       when 'Received', 'Authorised', 'Pending'
-        redirect_to '/checkouts/success'
+        respond_to do |format|
+          format.json { render json: @payment }
+          format.html { redirect_to success_checkouts_path }
+        end
       else
-        p @payment.resultCode
+        render json: @payment
       end
     end
   end

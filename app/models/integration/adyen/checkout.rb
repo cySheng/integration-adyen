@@ -48,14 +48,6 @@ class Integration::Adyen::Checkout
         "shopperEmail": 'testing112312@gmail.com'
       },
       :paymentMethod => payment_method["paymentMethod"].to_h,
-      #paymentMethod: {
-      #  "type": "scheme",
-      #  "holderName": "John Smith",
-      #  "number": "4545 4545 4545 4545",
-      #  "expiryMonth": "03",
-      #  "expiryYear": "2030",
-      #  "cvc": "737"
-      #},
       :origin => root_url,
       :returnUrl => return_url,
       :merchantAccount => ENV["MERCHANT_ACCOUNT"],
